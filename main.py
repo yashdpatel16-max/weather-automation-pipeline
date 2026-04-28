@@ -1,13 +1,8 @@
 print("🔥 before imports")
 
 from email_module import generate_weather_email_html, send_weather_report_email
-print("✅ email module loaded")
-
 from open_meteo_services import get_day_weather_predication_data
-print("✅ weather module loaded")
-
 from spread_services import get_sheet_data
-print("✅ sheet module loaded")
 
 import time
 from dotenv import load_dotenv
@@ -48,7 +43,7 @@ if __name__ == "__main__":
             )
             no_mail_sent = no_mail_sent+1
             print(f"{no_mail_sent} mail sent")
-            time.sleep(2)
+            time.sleep(15)
     print("✅ ALL TASKS COMPLETED - EXITING")
 
 
