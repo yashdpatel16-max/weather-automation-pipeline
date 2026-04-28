@@ -48,7 +48,7 @@ if __name__ == "__main__":
                 recipient_email = user['📧 Your Email']
                 username = user['😄 What should we call you?']
                 
-                print(f"⏳ Preparing to send to {recipient_email}...")
+                print(f"⏳ Preparing to send to {username}...")
                 
                 html = generate_weather_email_html(
                     username=username,
@@ -73,7 +73,7 @@ if __name__ == "__main__":
                 
                 if success:
                     no_mail_sent += 1
-                    print(f"✅ {no_mail_sent} mail sent to {recipient_email}")
+                    print(f"✅ {no_mail_sent} mail sent")
                 
                 time.sleep(2)
 
