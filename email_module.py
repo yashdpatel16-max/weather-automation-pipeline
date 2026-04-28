@@ -248,28 +248,28 @@ def generate_weather_email_html(username: str, weather: dict) -> str:
 
 
 
+
 # ==========================================
 # Unit 2: The Secure SMTP Mailer
 # ==========================================
-def send_weather_report_email(html_content: str, recipient_email: str,city: str) -> bool:
+def send_weather_report_email(server, html_content: str, recipient_email: str, city: str) -> bool:
     """
-    Sends an HTML-formatted email using Gmail's SMTP server.
-    Requires environment variables for authentication.
+    Sends an HTML-formatted email using an existing Gmail SMTP server connection.
     
     Args:
+        server (smtplib.SMTP_SSL): An already authenticated SMTP server instance.
         html_content (str): The HTML string to be sent as the email body.
         recipient_email (str): The destination email address.
+        city (str): The city name for the subject line.
         
     Returns:
         bool: True if the email was sent successfully, False otherwise.
     """
-    # 1. Fetch credentials securely from the environment
-    # In a local setup, you would set these in your terminal or a .env file
+    # 1. Fetch credentials (we only need the email here for the 'From' field)
     sender_email = os.environ.get("SENDER_EMAIL")
-    sender_password = os.environ.get("SENDER_APP_PASSWORD")
     
-    if not sender_email or not sender_password:
-        print("Auth Error: Email credentials are missing from environment variables.")
+    if not sender_email:
+        print("Auth Error: SENDER_EMAIL is missing from environment variables.")
         return False
 
     # 2. Construct the Email Message
@@ -282,19 +282,13 @@ def send_weather_report_email(html_content: str, recipient_email: str,city: str)
     mime_html = MIMEText(html_content, 'html')
     msg.attach(mime_html)
 
-    # 3. Establish Secure Connection and Send
+    # 3. Send using the OPEN connection passed into the function
     try:
-        # Port 465 is the standard for secure SMTP over SSL
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(sender_email, sender_password)
-            server.sendmail(sender_email, recipient_email, msg.as_string())
-            
-        print(f"Success: Weather report securely dispatched")
+        # Notice we are using the 'server' that was passed in, without logging in again!
+        server.sendmail(sender_email, recipient_email, msg.as_string())
+        print(f"Success: Weather report securely dispatched to {recipient_email}")
         return True
         
-    except smtplib.SMTPAuthenticationError:
-        print("SMTP Error: Authentication failed. Check your App Password.")
-        return False
     except Exception as e:
-        print(f"System Error: Failed to dispatch email due to: {e}")
+        print(f"System Error: Failed to dispatch email to {recipient_email} due to: {e}")
         return False
