@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
             for user in users:
                 recipient_email = user['📧 Your Email']
-                username = user['😄 What should we call you? ']
+                username = user['😄 What should we call you?']
                 
                 print(f"⏳ Preparing to send to {recipient_email}...")
                 
