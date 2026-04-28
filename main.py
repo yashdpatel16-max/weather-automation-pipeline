@@ -6,7 +6,7 @@ import time
 from dotenv import load_dotenv
 load_dotenv()
 
-
+print("🔥 Script file loaded")
 
 # --- Testing the Unit ---
 if __name__ == "__main__":
