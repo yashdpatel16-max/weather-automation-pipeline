@@ -286,9 +286,9 @@ def send_weather_report_email(server, html_content: str, recipient_email: str, c
     try:
         # Notice we are using the 'server' that was passed in, without logging in again!
         server.sendmail(sender_email, recipient_email, msg.as_string())
-        print(f"Success: Weather report securely dispatched to {recipient_email}")
+        print(f"Success: Weather report securely dispatched.")
         return True
         
     except Exception as e:
-        print(f"System Error: Failed to dispatch email to {recipient_email} due to: {e}")
+        print(f"System Error: Failed to dispatch email due to: {e}")
         return False
