@@ -1,6 +1,13 @@
-from email_module import generate_weather_email_html,send_weather_report_email
+print("🔥 before imports")
+
+from email_module import generate_weather_email_html, send_weather_report_email
+print("✅ email module loaded")
+
 from open_meteo_services import get_day_weather_predication_data
+print("✅ weather module loaded")
+
 from spread_services import get_sheet_data
+print("✅ sheet module loaded")
 
 import time
 from dotenv import load_dotenv
