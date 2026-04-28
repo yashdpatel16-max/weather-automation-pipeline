@@ -42,6 +42,7 @@ if __name__ == "__main__":
             no_mail_sent = no_mail_sent+1
             print(f"{no_mail_sent} mail sent")
             time.sleep(2)
+    print("✅ ALL TASKS COMPLETED - EXITING")
 
 
     
