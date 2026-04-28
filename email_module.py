@@ -1,139 +1,257 @@
-import pandas as pd
-from datetime import datetime
-import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # ==========================================
-# Unit 3: The Email Template Engine
+# Unit 1: The Email Template Engine
 # ==========================================
 
-def get_weather_description(code: float) -> tuple:
+def generate_weather_email_html(username: str, weather: dict) -> str:
     """
-    Translates WMO weather codes from Open-Meteo into readable text and emojis.
-    Returns: (Description string, Emoji string)
+    Generates a beautiful responsive HTML email template
+    for daily weather updates.
     """
-    weather_mapping = {
-        0: ("Clear sky", "☀️"),
-        1: ("Mainly clear", "🌤️"),
-        2: ("Partly cloudy", "⛅"),
-        3: ("Overcast", "☁️"),
-        45: ("Foggy", "🌫️"),
-        48: ("Depositing rime fog", "🌫️"),
-        51: ("Light drizzle", "🌧️"),
-        53: ("Moderate drizzle", "🌧️"),
-        55: ("Dense drizzle", "🌧️"),
-        61: ("Slight rain", "☔"),
-        63: ("Moderate rain", "☔"),
-        65: ("Heavy rain", "🌊☔"),
-        80: ("Slight rain showers", "🌦️"),
-    }
-    # Default to a general weather emoji if code is not found
-    return weather_mapping.get(int(code), ("Variable conditions", "🌍"))
 
-def format_duration(seconds: float) -> str:
-    """Converts raw seconds (like daylight_duration) into 'X hrs Y mins'."""
-    hours = int(seconds // 3600)
-    minutes = int((seconds % 3600) // 60)
-    return f"{hours}h {minutes}m"
-
-def generate_weather_email_html(df: pd.DataFrame) -> str:
-    """
-    Ingests the daily_dataframe and returns a fully styled, 
-    responsive HTML string ready to be sent via SMTP.
-    """
-    # Extract the first row of data (assuming it's today's forecast)
-    today = df.iloc[0]
-    
-    # 1. Clean and format the data
-    raw_date = today['date']
-    date_str = raw_date.strftime("%A, %B %d, %Y") if isinstance(raw_date, datetime) else str(raw_date).split()[0]
-    
-    max_temp = round(today['temperature_2m_max'], 1)
-    min_temp = round(today['temperature_2m_min'], 1)
-    uv_index = round(today['uv_index_max'], 1)
-    
-    weather_desc, weather_emoji = get_weather_description(today['weather_code'])
-    daylight = format_duration(today['daylight_duration'])
-    
-    # 2. The HTML Template (Using safe inline CSS for email clients)
-    html_template = f"""
+    html = f"""
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Daily Weather Update</title>
     </head>
-    <body style="margin: 0; padding: 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f7f6; color: #333333;">
-        
-        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-            
-            <div style="background-color: #1a73e8; padding: 30px 20px; text-align: center; color: #ffffff;">
-                <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 0.5px;">Daily Weather Briefing</h1>
-                <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">{date_str}</p>
+
+    <body style="
+        margin: 0;
+        padding: 0;
+        background-color: #eef2f7;
+        font-family: Arial, sans-serif;
+    ">
+
+        <div style="
+            max-width: 600px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+        ">
+
+            <!-- Header -->
+            <div style="
+                background: linear-gradient(135deg, #4facfe, #00c6fb);
+                color: white;
+                text-align: center;
+                padding: 35px 20px;
+            ">
+                <h1 style="
+                    margin: 0;
+                    font-size: 32px;
+                    font-weight: bold;
+                ">
+                    🌤️ Daily Weather Update
+                </h1>
+
+                <p style="
+                    margin-top: 10px;
+                    font-size: 16px;
+                    opacity: 0.95;
+                ">
+                    Personalized forecast just for you
+                </p>
             </div>
 
-            <div style="padding: 40px 20px; text-align: center; border-bottom: 1px solid #eeeeee;">
-                <div style="font-size: 64px; line-height: 1; margin-bottom: 10px;">{weather_emoji}</div>
-                <h2 style="margin: 0 0 5px 0; font-size: 28px; color: #202124;">{weather_desc}</h2>
-                
-                <div style="display: inline-block; margin-top: 20px;">
-                    <span style="font-size: 48px; font-weight: bold; color: #ea4335;">{max_temp}&deg;C</span>
-                    <span style="font-size: 24px; color: #70757a; margin: 0 15px;">/</span>
-                    <span style="font-size: 48px; font-weight: bold; color: #4285f4;">{min_temp}&deg;C</span>
+            <!-- Greeting -->
+            <div style="padding: 30px 25px 10px 25px;">
+                <h2 style="
+                    margin: 0;
+                    color: #202124;
+                    font-size: 24px;
+                ">
+                    Hey {username} 👋
+                </h2>
+
+                <p style="
+                    color: #5f6368;
+                    font-size: 16px;
+                    margin-top: 10px;
+                    line-height: 1.6;
+                ">
+                    Here's your weather forecast for
+                    <strong>{weather['city']}</strong>.
+                    Hope you have an amazing day ahead ☀️
+                </p>
+            </div>
+
+            <!-- Weather Card -->
+            <div style="
+                margin: 20px 25px;
+                background-color: #f8fbff;
+                border-radius: 16px;
+                padding: 25px;
+                border: 1px solid #dbe7f3;
+            ">
+
+                <div style="text-align: center;">
+                    <h2 style="
+                        margin: 0;
+                        font-size: 30px;
+                        color: #1a73e8;
+                    ">
+                        {weather['condition']}
+                    </h2>
+
+                    <p style="
+                        margin-top: 12px;
+                        font-size: 42px;
+                        color: #202124;
+                        font-weight: bold;
+                    ">
+                        {weather['max_temp']}°C
+                    </p>
+
+                    <p style="
+                        margin-top: -10px;
+                        color: #5f6368;
+                        font-size: 16px;
+                    ">
+                        Min Temp: {weather['min_temp']}°C
+                    </p>
                 </div>
-            </div>
 
-            <div style="padding: 30px 40px;">
-                <h3 style="margin: 0 0 20px 0; font-size: 18px; color: #5f6368; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">Atmospheric Details</h3>
-                
-                <table style="width: 100%; border-collapse: collapse;">
+                <!-- Info Grid -->
+                <table width="100%" cellpadding="10" cellspacing="0" style="
+                    margin-top: 20px;
+                    border-collapse: collapse;
+                ">
                     <tr>
-                        <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; width: 50%;">
-                            <strong style="color: #202124;">UV Index (Max):</strong>
+                        <td style="
+                            background-color: #ffffff;
+                            border-radius: 12px;
+                            text-align: center;
+                            border: 1px solid #e5e7eb;
+                        ">
+                            <p style="margin: 0; font-size: 14px; color: #5f6368;">
+                                🌅 Sunrise
+                            </p>
+
+                            <p style="
+                                margin: 8px 0 0 0;
+                                font-size: 18px;
+                                font-weight: bold;
+                                color: #202124;
+                            ">
+                                {weather['sunrise']}
+                            </p>
                         </td>
-                        <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: right; color: #d93025; font-weight: bold;">
-                            {uv_index}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
-                            <strong style="color: #202124;">Daylight Duration:</strong>
-                        </td>
-                        <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: right; color: #5f6368;">
-                            {daylight}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 12px 0;">
-                            <strong style="color: #202124;">Coordinates:</strong>
-                        </td>
-                        <td style="padding: 12px 0; text-align: right; color: #5f6368;">
-                            22.0&deg;N, 79.0&deg;E
+
+                        <td width="10"></td>
+
+                        <td style="
+                            background-color: #ffffff;
+                            border-radius: 12px;
+                            text-align: center;
+                            border: 1px solid #e5e7eb;
+                        ">
+                            <p style="margin: 0; font-size: 14px; color: #5f6368;">
+                                🌇 Sunset
+                            </p>
+
+                            <p style="
+                                margin: 8px 0 0 0;
+                                font-size: 18px;
+                                font-weight: bold;
+                                color: #202124;
+                            ">
+                                {weather['sunset']}
+                            </p>
                         </td>
                     </tr>
                 </table>
+
+                <!-- UV Index -->
+                <div style="
+                    margin-top: 20px;
+                    background-color: #ffffff;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 12px;
+                    padding: 18px;
+                    text-align: center;
+                ">
+                    <p style="
+                        margin: 0;
+                        font-size: 15px;
+                        color: #5f6368;
+                    ">
+                        ☀️ UV Index
+                    </p>
+
+                    <p style="
+                        margin: 10px 0 0 0;
+                        font-size: 28px;
+                        font-weight: bold;
+                        color: #f29900;
+                    ">
+                        {weather['uv_index']}
+                    </p>
+                </div>
             </div>
 
-            <div style="background-color: #f8f9fa; padding: 20px; text-align: center; color: #80868b; font-size: 12px;">
-                <p style="margin: 0;">This is an automated report generated by your Data Pipeline.</p>
-                <p style="margin: 5px 0 0 0;">Source: Open-Meteo API</p>
+            <!-- Friendly Message -->
+            <div style="
+                padding: 10px 25px 30px 25px;
+                text-align: center;
+            ">
+                <p style="
+                    color: #5f6368;
+                    font-size: 15px;
+                    line-height: 1.7;
+                    margin: 0;
+                ">
+                    Stay prepared and enjoy your day 🌈<br>
+                    More exciting automation features coming soon 🚀
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div style="
+                background-color: #f8f9fa;
+                padding: 20px;
+                text-align: center;
+                color: #80868b;
+                font-size: 12px;
+                border-top: 1px solid #e5e7eb;
+            ">
+                <p style="margin: 0;">
+                    This is an automated report generated by weather Data Pipeline.
+                </p>
+
+                <p style="margin: 5px 0 0 0;">
+                    Source: Open-Meteo API
+                </p>
+
+                <p style="margin: 10px 0 0 0;">
+                    Built with ❤️ by Yash
+                </p>
             </div>
 
         </div>
     </body>
     </html>
     """
-    return html_template
 
+    return html
 
 
 
 # ==========================================
-# Unit 4: The Secure SMTP Mailer
+# Unit 2: The Secure SMTP Mailer
 # ==========================================
-def send_weather_report_email(html_content: str, recipient_email: str) -> bool:
+def send_weather_report_email(html_content: str, recipient_email: str,city: str) -> bool:
     """
     Sends an HTML-formatted email using Gmail's SMTP server.
     Requires environment variables for authentication.
@@ -150,15 +268,14 @@ def send_weather_report_email(html_content: str, recipient_email: str) -> bool:
     sender_email = os.environ.get("SENDER_EMAIL")
     sender_password = os.environ.get("SENDER_APP_PASSWORD")
     
-    
     if not sender_email or not sender_password:
         print("Auth Error: Email credentials are missing from environment variables.")
         return False
 
     # 2. Construct the Email Message
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = "Your Daily Weather Briefing"
-    msg['From'] = sender_email
+    msg['Subject'] = f"🌤️ Weather Update for {city}"
+    msg['From'] = f"Weather Bot <{sender_email}>"
     msg['To'] = recipient_email
 
     # Attach the HTML content to the email container
@@ -172,7 +289,7 @@ def send_weather_report_email(html_content: str, recipient_email: str) -> bool:
             server.login(sender_email, sender_password)
             server.sendmail(sender_email, recipient_email, msg.as_string())
             
-        print(f"Success: Weather report securely dispatched to {recipient_email}")
+        print(f"Success: Weather report securely dispatched")
         return True
         
     except smtplib.SMTPAuthenticationError:
@@ -181,11 +298,3 @@ def send_weather_report_email(html_content: str, recipient_email: str) -> bool:
     except Exception as e:
         print(f"System Error: Failed to dispatch email due to: {e}")
         return False
-
-# # --- Testing the Unit ---
-# if __name__ == "__main__":
-    # Dummy HTML for standalone testing
-    # test_html = "<html><body><h1>Test Pipeline Active</h1></body></html>"
-    # target_inbox = "" # Replace with your actual email
-    
-    # send_weather_report_email(test_html, target_inbox)

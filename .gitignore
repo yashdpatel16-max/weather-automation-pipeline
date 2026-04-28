@@ -3,3 +3,4 @@ __pycache__/
 .cache.sqlite
 *.pdf
 news_automation/
+service_account.json
