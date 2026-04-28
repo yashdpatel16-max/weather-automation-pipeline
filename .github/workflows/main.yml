@@ -38,4 +38,4 @@ jobs:
           SENDER_APP_PASSWORD: ${{ secrets.SENDER_APP_PASSWORD }}
           SHEET_NAME: ${{ secrets.SHEET_NAME }}
         run: |
-          python main.py
+          python -u main.py
