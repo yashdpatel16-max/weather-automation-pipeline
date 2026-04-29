@@ -18,7 +18,7 @@ This project automates the complete workflow of:
 
 ## 🧠 Workflow Architecture
 
-![Workflow Diagram](./assets/workflow.png)
+![Workflow Diagram](./assets/work_flow.png)
 
 ---
 
