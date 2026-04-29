@@ -1,6 +1,8 @@
 # 🌤️ Weather Automation Pipeline
 
-An automated system that collects user data, fetches real-time weather forecasts, and sends personalized daily weather emails — fully running on GitHub Actions.
+An end-to-end automated system that collects user preferences, fetches real-time weather data, and sends personalized daily weather emails.
+
+🚀 Fully automated using GitHub Actions (runs daily without manual effort)
 
 ---
 
@@ -15,7 +17,17 @@ This project automates the complete workflow of:
 - Running automatically every day  
 
 ---
+## 🔄 Workflow
 
+The system follows an automated pipeline:
+
+- Google Form → Google Sheets  
+- Sheets → Coordinates (OpenStreetMap)  
+- Coordinates → Weather API (Open-Meteo)  
+- Weather Data → Email Generation  
+- GitHub Actions → Daily Automation
+  
+---
 ## 🧠 Workflow Architecture
 
 ![Workflow Diagram](./assets/work_flow.png)
